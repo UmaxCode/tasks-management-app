@@ -5,21 +5,33 @@ Transform:
   - AWS::Serverless-2016-10-31
 
 Parameters:
-  Env:
-    Type: String
-    Default: dev
-
   S3BucketName:
     Type: String
-    Default: majestic-static-site
-  CognitoUserPoolName:
+    Default: task-management-bucket
+  CognitoUserPoolId:
     Type: String
-    Default: majestic-userpool
-  CognitoWebClientName:
+  CognitoUserPoolClientId:
     Type: String
-    Default: majestic-webclient
 
 Resources:
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref S3BucketName
+
+  S3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3Bucket
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Action: "s3:GetObject"
+            Resource:
+              - !Sub "arn:aws:s3:::${S3Bucket}/*"
+            Principal:
+              AWS: !Sub "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudFrontOriginAccessIdentity}"
+
   CloudFrontOriginAccessIdentity:
     Type: "AWS::CloudFront::CloudFrontOriginAccessIdentity"
     Properties:
@@ -50,21 +62,3 @@ Resources:
             QueryString: false
           TargetOriginId: s3-website
           ViewerProtocolPolicy: redirect-to-https
-
-  S3Bucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Sub "${Env}-${S3BucketName}"
-
-  S3BucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref S3Bucket
-      PolicyDocument:
-        Statement:
-          - Effect: Allow
-            Action: "s3:GetObject"
-            Resource:
-              - !Sub "arn:aws:s3:::${S3Bucket}/*"
-            Principal:
-              AWS: !Sub "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudFrontOriginAccessIdentity}"
