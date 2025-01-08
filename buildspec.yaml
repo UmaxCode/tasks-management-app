@@ -1,0 +1,22 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 18 # Specify your Node.js version
+    commands:
+      - echo "Installing dependencies..."
+      - npm install
+  build:
+    commands:
+      - echo "Building the application with Vite..."
+      - npm run build
+  post_build:
+    commands:
+      - echo "Build phase complete."
+      - echo "Packaging artifacts for deployment..."
+
+artifacts:
+  files:
+    - "**/*" # Include all files
+  base-directory: dist # Directory where Vite places built files
