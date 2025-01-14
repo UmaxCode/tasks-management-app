@@ -99,7 +99,8 @@ export const TasksPage = () => {
       }
       const data = await response.data.data;
       setTasks(data);
-    } catch (error) {
+    } catch (err) {
+      const error: any = err;
       console.error(
         "There has been a problem with your fetch operation:",
         error
@@ -145,7 +146,8 @@ export const TasksPage = () => {
         description: message,
       });
       setFormSubmition({ isModalOpen: false, isSubmitted: false });
-    } catch (error) {
+    } catch (err) {
+      const error: any = err;
       console.error(
         "There has been a problem with your fetch operation:",
         error
