@@ -52,6 +52,7 @@ const UserDetailsPage = () => {
 
   const updateTasks = (data: TaskType) => {
     console.log(data);
+    console.log("DFDFDFDDDDFD");
     setTasks((prevTasks) =>
       prevTasks.map((task) => (task.id === data.id ? data : task))
     );

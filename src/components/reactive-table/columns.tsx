@@ -194,8 +194,8 @@ export const tasksColumns: ColumnDef<TaskType>[] = [
           if (response.status !== 200) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
-          const data = await response.data.data;
-          updateTaskTable(data);
+          const data = await response.data;
+          updateTaskTable(data.data);
           toast({
             title: "Task Update",
             description: data.message,
@@ -239,7 +239,7 @@ export const tasksColumns: ColumnDef<TaskType>[] = [
             throw new Error(`HTTP error! status: ${response.status}`);
           }
           const data = await response.data;
-          updateTaskTable(data);
+          updateTaskTable(data.data);
           toast({
             title: "Task Update",
             description: data.message,
@@ -282,7 +282,7 @@ export const tasksColumns: ColumnDef<TaskType>[] = [
             throw new Error(`HTTP error! status: ${response.status}`);
           }
           const data = await response.data;
-          updateTaskTable(data);
+          updateTaskTable(data.data);
           toast({
             title: "Task Update",
             description: data.message,
