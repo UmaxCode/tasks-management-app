@@ -1,11 +1,3 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -33,9 +25,10 @@ import { Endpoints } from "@/backend/endpoints";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
 import { useAdminContextData } from "@/contexts/AdminContext";
+import { DataTable } from "@/components/reactive-table/data-table";
+import { userColumns, UserType } from "@/components/reactive-table/columns";
 
 const formSchema = z.object({
   username: z.string().min(2, {
@@ -46,7 +39,6 @@ const formSchema = z.object({
 
 export const UsersPage = () => {
   const { toast } = useToast();
-  const [isloading, setIsLoading] = useState(false);
   const [formSubmition, setFormSubmition] = useState({
     isSubmitted: false,
     isModalOpen: false,
@@ -66,8 +58,6 @@ export const UsersPage = () => {
   });
 
   const fetchUsers = async () => {
-    setIsLoading(true);
-    console.log(idToken);
     try {
       const response = await axios.get(Endpoints.USERS, {
         headers: {
@@ -89,13 +79,12 @@ export const UsersPage = () => {
         title: "Uh oh! Something went wrong.",
         description: error.response.data.message,
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
   useEffect(() => {
     fetchUsers();
+    storeSelectedUser("");
   }, []);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -117,10 +106,14 @@ export const UsersPage = () => {
       if (response.status !== 201) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      const message = await response.data.message;
+      const responseData = await response.data;
+      const data = responseData.data;
+      console.log(data);
+      registeredUsers?.push(data);
+      storeRegisteredUsers(registeredUsers ? registeredUsers : []);
       toast({
         title: "User Creation",
-        description: message,
+        description: responseData.message,
       });
       setFormSubmition({ isModalOpen: false, isSubmitted: false });
     } catch (error) {
@@ -144,9 +137,10 @@ export const UsersPage = () => {
           </Button>
           <DialogContent className="sm:max-w-[425px]">
             <DialogPrimitive.Close
-              onClick={() =>
-                setFormSubmition({ ...formSubmition, isModalOpen: false })
-              }
+              onClick={() => {
+                form.reset();
+                setFormSubmition({ ...formSubmition, isModalOpen: false });
+              }}
               className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
             >
               <X className="h-4 w-4" />
@@ -201,59 +195,15 @@ export const UsersPage = () => {
           </DialogContent>
         </Dialog>
       </div>
-      <div className="bg- rounded-t-sm pb-2">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="">UserId</TableHead>
-              <TableHead>Username</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead className="">Role</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isloading ? (
-              // Show skeletons for the table rows only
-              <>
-                {[...Array(10)].map((_, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="">
-                      <Skeleton className="h-4 w-full" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-full" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-full" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-full" />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </>
-            ) : (
-              // Actual table content
-              <>
-                {registeredUsers?.map((registeredUser) => (
-                  <TableRow
-                    key={registeredUser.userId}
-                    onClick={() => {
-                      storeSelectedUser(registeredUser.email);
-                      navigate(`users/${registeredUser.userId}`);
-                    }}
-                    className=" cursor-pointer"
-                  >
-                    <TableCell>{registeredUser.userId}</TableCell>
-                    <TableCell>Username</TableCell>
-                    <TableCell>{registeredUser.email}</TableCell>
-                    <TableCell>Role</TableCell>
-                  </TableRow>
-                ))}
-              </>
-            )}
-          </TableBody>
-        </Table>
+      <div className="container mx-auto py-10">
+        <DataTable
+          columns={userColumns}
+          data={registeredUsers ? registeredUsers : []}
+          rowAction={(row: UserType) => {
+            storeSelectedUser(row.email);
+            navigate(`users/${row.userId}`);
+          }}
+        />
       </div>
     </div>
   );

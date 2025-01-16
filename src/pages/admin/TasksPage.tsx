@@ -1,11 +1,4 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { tasksColumns, TaskType } from "@/components/reactive-table/columns";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -42,17 +35,9 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useAdminContextData } from "@/contexts/AdminContext";
-
-type TaskType = {
-  id: string;
-  name: string;
-  description: string;
-  deadline: string;
-  responsibility: string;
-  status: string;
-};
+import { TableProvider } from "@/contexts/TableContext";
+import { DataTable } from "@/components/reactive-table/data-table";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -63,13 +48,12 @@ const formSchema = z.object({
   responsibility: z.string().min(3, {}),
 });
 export const TasksPage = () => {
-  const [tasks, setTasks] = useState<TaskType[] | null>(null);
+  const [tasks, setTasks] = useState<TaskType[]>([]);
   const { toast } = useToast();
   const [formSubmition, setFormSubmition] = useState({
     isSubmitted: false,
     isModalOpen: false,
   });
-  const [isLoading, setIsLoading] = useState(false);
 
   const { idToken } = useAuth();
 
@@ -86,7 +70,6 @@ export const TasksPage = () => {
   });
 
   const fetchTasks = async () => {
-    setIsLoading(true);
     try {
       const response = await axios.get(Endpoints.TASKS, {
         headers: {
@@ -110,8 +93,6 @@ export const TasksPage = () => {
         title: "Uh oh! Something went wrong.",
         description: error.response.data.message,
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -140,7 +121,9 @@ export const TasksPage = () => {
       if (response.status !== 201) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      const message = await response.data.message;
+      const data = await response.data;
+      setTasks((prevTasks) => [...prevTasks, data.data]);
+      const message = data.message;
       toast({
         title: "Task Creation",
         description: message,
@@ -161,6 +144,13 @@ export const TasksPage = () => {
     setFormSubmition({ isModalOpen: false, isSubmitted: false });
   }
 
+  const updateTasks = (data: TaskType) => {
+    console.log(data);
+    setTasks((prevTasks) =>
+      prevTasks.map((task) => (task.id === data.id ? data : task))
+    );
+  };
+
   return (
     <div className="p-3">
       <div className="p-3">
@@ -174,9 +164,10 @@ export const TasksPage = () => {
           </Button>
           <DialogContent className="sm:max-w-[425px]">
             <DialogPrimitive.Close
-              onClick={() =>
-                setFormSubmition({ ...formSubmition, isModalOpen: false })
-              }
+              onClick={() => {
+                form.reset();
+                setFormSubmition({ ...formSubmition, isModalOpen: false });
+              }}
               className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
             >
               <X className="h-4 w-4" />
@@ -283,62 +274,9 @@ export const TasksPage = () => {
         </Dialog>
       </div>
       <div className="bg- rounded-t-sm pb-2">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="">Task Id</TableHead>
-              <TableHead>Task Name</TableHead>
-              <TableHead>Task Description</TableHead>
-              <TableHead className="">Task Deadline</TableHead>
-              <TableHead className="">Responsibility</TableHead>
-              <TableHead className="">Task Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              // Show skeletons for the table rows only
-              <>
-                {[...Array(10)].map((_, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="">
-                      <Skeleton className="h-4 w-full" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-full" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-full" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-full" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-full" />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </>
-            ) : (
-              // Actual table content
-              <>
-                {tasks?.map((task) => (
-                  <TableRow
-                    key={task.id}
-                    onClick={() => {}}
-                    className=" cursor-pointer"
-                  >
-                    <TableCell>{task.id}</TableCell>
-                    <TableCell>{task.name}</TableCell>
-                    <TableCell>{task.description}</TableCell>
-                    <TableCell>{task.deadline}</TableCell>
-                    <TableCell>{task.responsibility}</TableCell>
-                    <TableCell>{task.status}</TableCell>
-                  </TableRow>
-                ))}
-              </>
-            )}
-          </TableBody>
-        </Table>
+        <TableProvider updateTaskTable={updateTasks}>
+          <DataTable columns={tasksColumns} data={tasks} rowAction={() => {}} />
+        </TableProvider>
       </div>
     </div>
   );
