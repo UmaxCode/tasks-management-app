@@ -1,11 +1,5 @@
+import { UserType } from "@/components/reactive-table/columns";
 import { createContext, useContext, useState, ReactNode } from "react";
-
-type UserType = {
-  userId: string;
-  name: string;
-  email: string;
-  role: string;
-};
 
 interface AdminContextProps {
   selectedUser: string | null;
@@ -32,7 +26,7 @@ export const AdminContextProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const storeRegisteredUsers = (users: UserType[]) => {
-    setRegisteredUsers(users);
+    setRegisteredUsers([...users]);
     localStorage.setItem("registeredUsers", JSON.stringify(users));
   };
 
