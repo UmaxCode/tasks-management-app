@@ -45,6 +45,7 @@ import {
 } from "../ui/select";
 import { useAdminContextData } from "@/contexts/AdminContext";
 import { useTableContext } from "@/contexts/TableContext";
+import { Textarea } from "../ui/textarea";
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 export type UserType = {
@@ -501,6 +502,218 @@ export const tasksColumns: ColumnDef<TaskType>[] = [
                     </form>
                   </Form>
                 ) : null}
+              </div>
+            </DialogContent>
+          </Dialog>
+        </>
+      );
+    },
+  },
+];
+
+const formSchemaTaskComment = z.object({
+  comment: z.string().min(5, {
+    message: "comment must be at least 5 characters.",
+  }),
+});
+
+export const userTasksColumns: ColumnDef<TaskType>[] = [
+  {
+    accessorKey: "id",
+    header: "Task Id",
+  },
+  {
+    accessorKey: "name",
+    header: "Task Name",
+  },
+  {
+    accessorKey: "description",
+    header: "Task Description",
+  },
+  {
+    accessorKey: "deadline",
+    header: "Task Deadline",
+  },
+  {
+    accessorKey: "responsibility",
+    header: "Assigned To",
+  },
+  {
+    accessorKey: "status",
+    header: "Task status",
+  },
+
+  {
+    id: "actions",
+    cell: ({ row }) => {
+      const task = row.original;
+      const [formSubmition, setFormSubmition] = useState({
+        isSubmitted: false,
+        isModalOpen: false,
+        editType: "taskDetails",
+      });
+      const { updateTaskTable } = useTableContext();
+
+      const formTaskComment = useForm<z.infer<typeof formSchemaTaskComment>>({
+        resolver: zodResolver(formSchemaTaskComment),
+        defaultValues: {
+          comment: "",
+        },
+      });
+
+      const { idToken } = useAuth();
+
+      const markTaskAsCompleted = async () => {
+        try {
+          const response = await axios.patch(
+            `${Endpoints.TASKS}/${row.original.id}/completed`,
+            {
+              headers: {
+                Accept: "application/json",
+                Authorization: `Bearer ${idToken}`,
+              },
+            }
+          );
+          if (response.status !== 200) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const data = await response.data;
+          updateTaskTable(data.data);
+          toast({
+            title: "Task Update",
+            description: data.message,
+          });
+        } catch (err) {
+          const error: any = err;
+          toast({
+            variant: "destructive",
+            title: "Uh oh! Something went wrong.",
+            description: error.response.data.message,
+          });
+        }
+      };
+
+      const addCommentToTask = async (
+        values: z.infer<typeof formSchemaTaskComment>
+      ) => {
+        setFormSubmition({ ...formSubmition, isSubmitted: true });
+        try {
+          const response = await axios.patch(
+            `${Endpoints.TASKS}/${row.original.id}`,
+            {
+              description: values.comment,
+            },
+            {
+              headers: {
+                Accept: "application/json",
+                Authorization: `Bearer ${idToken}`,
+              },
+            }
+          );
+          if (response.status !== 200) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const data = await response.data;
+          updateTaskTable(data.data);
+          toast({
+            title: "Task Update",
+            description: data.message,
+          });
+        } catch (err) {
+          const error: any = err;
+          toast({
+            variant: "destructive",
+            title: "Uh oh! Something went wrong.",
+            description: error.response.data.message,
+          });
+        } finally {
+          setFormSubmition({
+            ...formSubmition,
+            isModalOpen: false,
+            isSubmitted: false,
+          });
+          formTaskComment.reset();
+        }
+      };
+
+      return (
+        <>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem
+                onClick={() =>
+                  setFormSubmition({
+                    ...formSubmition,
+                    isModalOpen: true,
+                    editType: "taskDetails",
+                  })
+                }
+              >
+                Add Comment
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              {task.status === "open" && (
+                <DropdownMenuItem onClick={markTaskAsCompleted}>
+                  Mark as completed
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Dialog open={formSubmition.isModalOpen}>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogPrimitive.Close
+                onClick={() => {
+                  formTaskComment.reset();
+                  setFormSubmition({ ...formSubmition, isModalOpen: false });
+                }}
+                className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
+              >
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close</span>
+              </DialogPrimitive.Close>
+              <DialogHeader>
+                <DialogTitle>Edit tasks</DialogTitle>
+                <DialogDescription>
+                  Make changes to user's task here. Click submit when you're
+                  done.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <Form {...formTaskComment}>
+                  <form
+                    onSubmit={formTaskComment.handleSubmit(addCommentToTask)}
+                    className="space-y-8"
+                  >
+                    <FormField
+                      control={formTaskComment.control}
+                      name="comment"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Task Comment</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="comment..." {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <Button type="submit">
+                      {formSubmition.isSubmitted ? (
+                        <div className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
+                      ) : (
+                        "Submit"
+                      )}
+                    </Button>
+                  </form>
+                </Form>
               </div>
             </DialogContent>
           </Dialog>

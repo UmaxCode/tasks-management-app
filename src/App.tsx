@@ -24,7 +24,7 @@ const router = createBrowserRouter(
         <Route path="users/:email" element={<UserDetailsPage />} />
         <Route path="tasks" element={<TasksPage />} />
       </Route>
-      <Route path="/user/dashboard" element={<UserPageLayout />}></Route>
+      <Route path="/user/dashboard" element={<UserPageLayout />} />
       <Route path="*" element={<ErrorPage />} />
     </Route>
   )
