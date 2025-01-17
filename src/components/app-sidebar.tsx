@@ -7,6 +7,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useAuth } from "@/contexts/AuthContext";
 
 import { User, Book } from "lucide-react";
 import { NavLink } from "react-router-dom";
@@ -28,6 +29,7 @@ const items = [
 ];
 
 export function AppSidebar() {
+  const { email } = useAuth();
   return (
     <Sidebar>
       <SidebarContent>
@@ -35,6 +37,7 @@ export function AppSidebar() {
           <SidebarGroupLabel className="text-xl mb-3 text-primary">
             Admin Dashboard
           </SidebarGroupLabel>
+          <h1 className="pl-2 pb-4">{email}</h1>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
