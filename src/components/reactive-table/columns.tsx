@@ -114,10 +114,10 @@ export const tasksColumns: ColumnDef<TaskType>[] = [
     accessorKey: "name",
     header: "Task Name",
   },
-  {
-    accessorKey: "description",
-    header: "Task Description",
-  },
+  // {
+  //   accessorKey: "description",
+  //   header: "Task Description",
+  // },
   {
     accessorKey: "deadline",
     header: "Task Deadline",
@@ -322,12 +322,25 @@ export const tasksColumns: ColumnDef<TaskType>[] = [
                   setFormSubmition({
                     ...formSubmition,
                     isModalOpen: true,
-                    editType: "taskDetails",
+                    editType: "viewTaskDetails",
                   })
                 }
               >
-                Edit Task Details
+                View Task Details
               </DropdownMenuItem>
+              {task.status === "complete" && (
+                <DropdownMenuItem
+                  onClick={() =>
+                    setFormSubmition({
+                      ...formSubmition,
+                      isModalOpen: true,
+                      editType: "taskDetails",
+                    })
+                  }
+                >
+                  Edit Task Details
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               {task.status === "open" && (
                 <DropdownMenuItem
@@ -371,137 +384,211 @@ export const tasksColumns: ColumnDef<TaskType>[] = [
                 <X className="h-4 w-4" />
                 <span className="sr-only">Close</span>
               </DialogPrimitive.Close>
-              <DialogHeader>
-                <DialogTitle>Edit tasks</DialogTitle>
-                <DialogDescription>
-                  Make changes to user's task here. Click submit when you're
-                  done.
-                </DialogDescription>
-              </DialogHeader>
               <div className="grid gap-4 py-4">
                 {formSubmition.editType === "taskDetails" ? (
-                  <Form {...formTaskDetails}>
-                    <form
-                      onSubmit={formTaskDetails.handleSubmit(editTaskDetails)}
-                      className="space-y-8"
-                    >
-                      <FormField
-                        control={formTaskDetails.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Task Name</FormLabel>
-                            <FormControl>
-                              <Input placeholder="task name" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={formTaskDetails.control}
-                        name="description"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Task Description</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="task description"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <Button type="submit">
-                        {formSubmition.isSubmitted ? (
-                          <div className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
-                        ) : (
-                          "Submit"
-                        )}
-                      </Button>
-                    </form>
-                  </Form>
-                ) : formSubmition.editType === "resign" ? (
-                  <Form {...formResponsibility}>
-                    <form
-                      onSubmit={formResponsibility.handleSubmit(reAssignTask)}
-                      className="space-y-8"
-                    >
-                      <FormField
-                        control={formResponsibility.control}
-                        name="responsibility"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <Select
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                            >
+                  <>
+                    <DialogHeader>
+                      <DialogTitle>Edit tasks</DialogTitle>
+                      <DialogDescription>
+                        Make changes to user's task here. Click submit when
+                        you're done.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <Form {...formTaskDetails}>
+                      <form
+                        onSubmit={formTaskDetails.handleSubmit(editTaskDetails)}
+                        className="space-y-8"
+                      >
+                        <FormField
+                          control={formTaskDetails.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Task Name</FormLabel>
                               <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select a verified email to display" />
-                                </SelectTrigger>
+                                <Input placeholder="task name" {...field} />
                               </FormControl>
-                              <SelectContent>
-                                {eligibleTaskAssignableUser ? (
-                                  eligibleTaskAssignableUser.map((user) => {
-                                    return (
-                                      <SelectItem
-                                        key={user.email}
-                                        value={user.email}
-                                      >
-                                        {user.email}
-                                      </SelectItem>
-                                    );
-                                  })
-                                ) : (
-                                  <></>
-                                )}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <Button type="submit">
-                        {formSubmition.isSubmitted ? (
-                          <div className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
-                        ) : (
-                          "Submit"
-                        )}
-                      </Button>
-                    </form>
-                  </Form>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={formTaskDetails.control}
+                          name="description"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Task Description</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="task description"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <Button type="submit">
+                          {formSubmition.isSubmitted ? (
+                            <div className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
+                          ) : (
+                            "Submit"
+                          )}
+                        </Button>
+                      </form>
+                    </Form>
+                  </>
+                ) : formSubmition.editType === "resign" ? (
+                  <>
+                    <DialogHeader>
+                      <DialogTitle>Edit tasks</DialogTitle>
+                      <DialogDescription>
+                        Make changes to user's task here. Click submit when
+                        you're done.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <Form {...formResponsibility}>
+                      <form
+                        onSubmit={formResponsibility.handleSubmit(reAssignTask)}
+                        className="space-y-8"
+                      >
+                        <FormField
+                          control={formResponsibility.control}
+                          name="responsibility"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Email</FormLabel>
+                              <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select a verified email to display" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {eligibleTaskAssignableUser ? (
+                                    eligibleTaskAssignableUser.map((user) => {
+                                      return (
+                                        <SelectItem
+                                          key={user.email}
+                                          value={user.email}
+                                        >
+                                          {user.email}
+                                        </SelectItem>
+                                      );
+                                    })
+                                  ) : (
+                                    <></>
+                                  )}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <Button type="submit">
+                          {formSubmition.isSubmitted ? (
+                            <div className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
+                          ) : (
+                            "Submit"
+                          )}
+                        </Button>
+                      </form>
+                    </Form>
+                  </>
                 ) : formSubmition.editType === "reopen" ? (
-                  <Form {...formDeadline}>
-                    <form
-                      onSubmit={formDeadline.handleSubmit(reOpendTask)}
-                      className="space-y-8"
-                    >
-                      <FormField
-                        control={formDeadline.control}
-                        name="deadline"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Task Deadline</FormLabel>
-                            <FormControl>
-                              <Input placeholder="deadline" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                  <>
+                    <DialogHeader>
+                      <DialogTitle>Edit tasks</DialogTitle>
+                      <DialogDescription>
+                        Make changes to user's task here. Click submit when
+                        you're done.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <Form {...formDeadline}>
+                      <form
+                        onSubmit={formDeadline.handleSubmit(reOpendTask)}
+                        className="space-y-8"
+                      >
+                        <FormField
+                          control={formDeadline.control}
+                          name="deadline"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Task Deadline</FormLabel>
+                              <FormControl>
+                                <Input placeholder="deadline" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <Button type="submit">
+                          {formSubmition.isSubmitted ? (
+                            <div className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
+                          ) : (
+                            "Submit"
+                          )}
+                        </Button>
+                      </form>
+                    </Form>
+                  </>
+                ) : formSubmition.editType === "viewTaskDetails" ? (
+                  <div className="">
+                    <h1 className="py-2">Task Details</h1>
+                    <div className="mb-4">
+                      <label
+                        htmlFor="title"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        Task Name
+                      </label>
+                      <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        value={row.original.name}
+                        className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        placeholder="Enter the title"
                       />
-                      <Button type="submit">
-                        {formSubmition.isSubmitted ? (
-                          <div className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
-                        ) : (
-                          "Submit"
-                        )}
-                      </Button>
-                    </form>
-                  </Form>
+                    </div>
+
+                    <div className="mb-4">
+                      <label
+                        htmlFor="description"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        Task Description
+                      </label>
+                      <textarea
+                        id="description"
+                        name="description"
+                        value={row.original.description}
+                        rows={4}
+                        className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        placeholder="Enter the description"
+                      ></textarea>
+                    </div>
+
+                    <div className="mb-4">
+                      <label
+                        htmlFor="description"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        Task Comment
+                      </label>
+                      <textarea
+                        id="comment"
+                        name="comment"
+                        value={row.original.comment}
+                        rows={4}
+                        className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        placeholder="Enter the description"
+                      ></textarea>
+                    </div>
+                  </div>
                 ) : null}
               </div>
             </DialogContent>
