@@ -85,23 +85,19 @@ export const userColumns: ColumnDef<UserType>[] = [
 ];
 
 const formSchemaDeadline = z.object({
-  deadline: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
+  deadline: z.string().nonempty("Deadline is required"),
 });
 
 const formSchemaResponsibility = z.object({
-  responsibility: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
+  responsibility: z.string().email({ message: "Invalid email format." }),
 });
 
 const formSchemaTaskDetails = z.object({
-  name: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
+  name: z.string().min(3, {
+    message: "Task name must be at least 3 characters.",
   }),
-  description: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
+  description: z.string().min(5, {
+    message: "Task description must be at least 5 characters.",
   }),
 });
 

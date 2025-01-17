@@ -40,12 +40,14 @@ import { TableProvider } from "@/contexts/TableContext";
 import { DataTable } from "@/components/reactive-table/data-table";
 
 const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
+  name: z.string().min(3, {
+    message: "Task name must be at least 3 characters.",
   }),
-  description: z.string().min(10, {}),
-  deadline: z.string().min(10, {}),
-  responsibility: z.string().min(3, {}),
+  description: z.string().min(5, {
+    message: "Task description must be at least 5 characters.",
+  }),
+  deadline: z.string().nonempty("Task deadline is required."),
+  responsibility: z.string().email({ message: "Invalid email format." }),
 });
 export const TasksPage = () => {
   const [tasks, setTasks] = useState<TaskType[]>([]);
