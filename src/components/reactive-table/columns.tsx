@@ -599,7 +599,7 @@ export const userTasksColumns: ColumnDef<TaskType>[] = [
         setFormSubmition({ ...formSubmition, isSubmitted: true });
         try {
           const response = await axios.patch(
-            `${Endpoints.TASKS}/${row.original.id}`,
+            `${Endpoints.TASKS}/${row.original.id}/comment`,
             {
               description: values.comment,
             },
