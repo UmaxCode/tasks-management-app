@@ -601,7 +601,7 @@ export const userTasksColumns: ColumnDef<TaskType>[] = [
           const response = await axios.patch(
             `${Endpoints.TASKS}/${row.original.id}/comment`,
             {
-              description: values.comment,
+              comment: values.comment,
             },
             {
               headers: {
