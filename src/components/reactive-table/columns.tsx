@@ -560,9 +560,9 @@ export const userTasksColumns: ColumnDef<TaskType>[] = [
         try {
           const response = await axios.patch(
             `${Endpoints.TASKS}/${row.original.id}/completed`,
+            {},
             {
               headers: {
-                Accept: "application/json",
                 Authorization: `Bearer ${idToken}`,
               },
             }
