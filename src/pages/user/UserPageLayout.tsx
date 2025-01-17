@@ -8,11 +8,16 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Endpoints } from "@/backend/endpoints";
 import { useAuth } from "@/contexts/AuthContext";
+import { Navigate } from "react-router-dom";
 
 export const UserPageLayout = () => {
   const [tasks, setTasks] = useState<TaskType[]>([]);
 
-  const { idToken, email } = useAuth();
+  const { idToken, email, clearAuthData } = useAuth();
+
+  if (!idToken) {
+    return <Navigate to="/" />;
+  }
 
   const fetchUserTasks = async () => {
     try {
@@ -51,6 +56,14 @@ export const UserPageLayout = () => {
       <header className="p-5 flex items-center justify-between">
         <span className="text-2xl text-gray-800 font-bold ">User Tasks</span>
         <span>{email}</span>
+        <button
+          onClick={() => {
+            clearAuthData();
+          }}
+          className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/70"
+        >
+          Logout
+        </button>
       </header>
 
       <div className="bg- rounded-t-sm pb-2">
