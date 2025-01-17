@@ -255,7 +255,11 @@ export const TasksPage = () => {
                     <FormItem>
                       <FormLabel>Deadline</FormLabel>
                       <FormControl>
-                        <Input placeholder="deadline" {...field} />
+                        <Input
+                          placeholder="deadline"
+                          type="datetime-local"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

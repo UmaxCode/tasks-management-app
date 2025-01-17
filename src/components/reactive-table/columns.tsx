@@ -519,7 +519,11 @@ export const tasksColumns: ColumnDef<TaskType>[] = [
                             <FormItem>
                               <FormLabel>Task Deadline</FormLabel>
                               <FormControl>
-                                <Input placeholder="deadline" {...field} />
+                                <Input
+                                  placeholder="deadline"
+                                  type="datetime-local"
+                                  {...field}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
