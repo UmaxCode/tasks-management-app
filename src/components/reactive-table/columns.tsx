@@ -61,6 +61,7 @@ export type TaskType = {
   description: string;
   responsibility: string;
   deadline: string;
+  comment: string;
   status: "open" | "complete" | "expired";
 };
 
@@ -527,16 +528,8 @@ export const userTasksColumns: ColumnDef<TaskType>[] = [
     header: "Task Name",
   },
   {
-    accessorKey: "description",
-    header: "Task Description",
-  },
-  {
     accessorKey: "deadline",
     header: "Task Deadline",
-  },
-  {
-    accessorKey: "responsibility",
-    header: "Assigned To",
   },
   {
     accessorKey: "status",
@@ -648,11 +641,22 @@ export const userTasksColumns: ColumnDef<TaskType>[] = [
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem
+                onClick={() => {
+                  setFormSubmition({
+                    ...formSubmition,
+                    isModalOpen: true,
+                    editType: "viewTaskDetails",
+                  });
+                }}
+              >
+                View Task Details
+              </DropdownMenuItem>
+              <DropdownMenuItem
                 onClick={() =>
                   setFormSubmition({
                     ...formSubmition,
                     isModalOpen: true,
-                    editType: "taskDetails",
+                    editType: "addComment",
                   })
                 }
               >
@@ -678,42 +682,103 @@ export const userTasksColumns: ColumnDef<TaskType>[] = [
                 <X className="h-4 w-4" />
                 <span className="sr-only">Close</span>
               </DialogPrimitive.Close>
-              <DialogHeader>
-                <DialogTitle>Edit tasks</DialogTitle>
-                <DialogDescription>
-                  Make changes to user's task here. Click submit when you're
-                  done.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <Form {...formTaskComment}>
-                  <form
-                    onSubmit={formTaskComment.handleSubmit(addCommentToTask)}
-                    className="space-y-8"
-                  >
-                    <FormField
-                      control={formTaskComment.control}
-                      name="comment"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Task Comment</FormLabel>
-                          <FormControl>
-                            <Textarea placeholder="comment..." {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
 
-                    <Button type="submit">
-                      {formSubmition.isSubmitted ? (
-                        <div className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
-                      ) : (
-                        "Submit"
-                      )}
-                    </Button>
-                  </form>
-                </Form>
+              <div className="grid gap-4 py-4">
+                {formSubmition.editType === "addComment" ? (
+                  <>
+                    <DialogHeader>
+                      <DialogTitle>Edit tasks</DialogTitle>
+                      <DialogDescription>
+                        Make changes to user's task here. Click submit when
+                        you're done.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <Form {...formTaskComment}>
+                      <form
+                        onSubmit={formTaskComment.handleSubmit(
+                          addCommentToTask
+                        )}
+                        className="space-y-8"
+                      >
+                        <FormField
+                          control={formTaskComment.control}
+                          name="comment"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Task Comment</FormLabel>
+                              <FormControl>
+                                <Textarea placeholder="comment..." {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <Button type="submit">
+                          {formSubmition.isSubmitted ? (
+                            <div className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
+                          ) : (
+                            "Submit"
+                          )}
+                        </Button>
+                      </form>
+                    </Form>
+                  </>
+                ) : (
+                  <div className="">
+                    <h1 className="py-2">Task Details</h1>
+                    <div className="mb-4">
+                      <label
+                        htmlFor="title"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        Task Name
+                      </label>
+                      <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        value={row.original.name}
+                        className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        placeholder="Enter the title"
+                      />
+                    </div>
+
+                    <div className="mb-4">
+                      <label
+                        htmlFor="description"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        Task Description
+                      </label>
+                      <textarea
+                        id="description"
+                        name="description"
+                        value={row.original.description}
+                        rows={4}
+                        className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        placeholder="Enter the description"
+                      ></textarea>
+                    </div>
+
+                    <div className="mb-4">
+                      <label
+                        htmlFor="description"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        Task Comment
+                      </label>
+                      <textarea
+                        id="comment"
+                        name="comment"
+                        value={row.original.comment}
+                        rows={4}
+                        className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        placeholder="Enter the description"
+                      ></textarea>
+                    </div>
+                  </div>
+                )}
               </div>
             </DialogContent>
           </Dialog>

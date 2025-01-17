@@ -48,8 +48,9 @@ export const UserPageLayout = () => {
 
   return (
     <div className="p-3">
-      <header className="p-5">
-        <h1 className="text-2xl text-gray-800 font-bold ">User Tasks</h1>
+      <header className="p-5 flex items-center justify-between">
+        <span className="text-2xl text-gray-800 font-bold ">User Tasks</span>
+        <span>{email}</span>
       </header>
 
       <div className="bg- rounded-t-sm pb-2">
