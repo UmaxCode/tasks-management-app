@@ -1,4 +1,11 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { jwtDecode, JwtPayload } from "jwt-decode";
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
 
 interface AuthContextProps {
   accessToken: string | null;
@@ -55,6 +62,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem("email");
   };
 
+  // Logout when the token expires or id_token is missing
+  useEffect(() => {
+    const checkTokenValidity = () => {
+      const token = localStorage.getItem("id_token");
+
+      if (isTokenExpired(token)) {
+        clearAuthData();
+      }
+    };
+
+    // Set an interval to check token validity periodically
+    const interval = setInterval(checkTokenValidity, 1000);
+
+    return () => clearInterval(interval); // Cleanup interval on unmount
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{ accessToken, idToken, role, email, setAuthData, clearAuthData }}
@@ -70,4 +93,16 @@ export const useAuth = (): AuthContextProps => {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
+};
+
+// Function to check if a JWT is expired
+const isTokenExpired = (token: string | null): boolean => {
+  if (!token) return true;
+  try {
+    const { exp } = jwtDecode<JwtPayload>(token);
+    if (!exp) return true; // If no expiry, consider it invalid
+    return Date.now() >= exp * 1000; // Compare current time with expiry time
+  } catch (e) {
+    return true; // If there's an error decoding, consider it expired
+  }
 };
