@@ -26,7 +26,10 @@ export const AdminContextProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const storeRegisteredUsers = (users: UserType[]) => {
-    setRegisteredUsers([...users]);
+    const filteredUsersWithoutAdmin = users.filter(
+      (user) => user.role !== "ADMIN"
+    );
+    setRegisteredUsers([...filteredUsersWithoutAdmin]);
     localStorage.setItem("registeredUsers", JSON.stringify(users));
   };
 
