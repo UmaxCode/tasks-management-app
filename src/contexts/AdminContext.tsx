@@ -30,7 +30,10 @@ export const AdminContextProvider = ({ children }: { children: ReactNode }) => {
       (user) => user.role !== "ADMIN"
     );
     setRegisteredUsers([...filteredUsersWithoutAdmin]);
-    localStorage.setItem("registeredUsers", JSON.stringify(users));
+    localStorage.setItem(
+      "registeredUsers",
+      JSON.stringify(filteredUsersWithoutAdmin)
+    );
   };
 
   const clearAdminContextData = () => {
