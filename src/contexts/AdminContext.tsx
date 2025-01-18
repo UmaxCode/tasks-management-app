@@ -12,17 +12,12 @@ interface AdminContextProps {
 const AdminContext = createContext<AdminContextProps | undefined>(undefined);
 
 export const AdminContextProvider = ({ children }: { children: ReactNode }) => {
-  const [selectedUser, setSelectedUser] = useState<string | null>(
-    localStorage.getItem("selectedUser")
-  );
+  const [selectedUser, setSelectedUser] = useState<string | null>("");
 
-  const [registeredUsers, setRegisteredUsers] = useState<UserType[] | null>(
-    JSON.parse(localStorage.getItem("registeredUsers") || "null")
-  );
+  const [registeredUsers, setRegisteredUsers] = useState<UserType[] | null>([]);
 
   const storeSelectedUser = (email: string) => {
     setSelectedUser(email);
-    localStorage.setItem("selectedUser", email);
   };
 
   const storeRegisteredUsers = (users: UserType[]) => {
@@ -30,17 +25,11 @@ export const AdminContextProvider = ({ children }: { children: ReactNode }) => {
       (user) => user.role !== "ADMIN"
     );
     setRegisteredUsers([...filteredUsersWithoutAdmin]);
-    localStorage.setItem(
-      "registeredUsers",
-      JSON.stringify(filteredUsersWithoutAdmin)
-    );
   };
 
   const clearAdminContextData = () => {
-    setSelectedUser(null);
-    setRegisteredUsers(null);
-    localStorage.removeItem("selectedUser");
-    localStorage.removeItem("registeredUsers");
+    setSelectedUser("");
+    setRegisteredUsers([]);
   };
 
   return (
